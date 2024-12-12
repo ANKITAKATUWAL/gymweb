@@ -1,0 +1,198 @@
+/* General styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #222;
+    background: url(image/background2.jpg) center/cover no-repeat fixed;
+    color: #fff;
+}
+
+/* .admin-view-container {
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: #fff;
+    display: inline-block;
+    margin-right: 5px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #333;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
+} */
+
+.admin-view-container {
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: #fff;
+    display: block;
+    padding: 20px;
+    background-color: #333;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: auto; /* Center horizontally */
+    margin-top: 20px; /* Add margin to top */
+    margin-bottom: 20px; /* Add margin to bottom */
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table th,
+table td {
+    padding: 10px;
+    border: 1px solid #444;
+    text-align: left;
+}
+
+table th {
+    background-color: #555;
+}
+
+table tr:nth-child(even) {
+    background-color: #444;
+}
+
+table tr:hover {
+    background-color: #666;
+}
+
+/* Links */
+a {
+    text-decoration: none;
+    color: #fff;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Logout button */
+.admin-view-container p a {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.admin-view-container p a:hover {
+    background-color: #0056b3;
+}
+
+/* Update and Delete buttons */
+.admin-view-container table a {
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: #fff;
+}
+
+/* .admin-view-container table a[href^="update.php"] {
+    background-color: #28a745 !important; 
+} */
+
+/* .admin-view-container table a[href^="delete.php"] {
+    background-color: #dc3545 !important;
+    color: #fff; 
+} */
+
+.admin-view-container table a[href^="delete.php"]:hover {
+    opacity: 0.8;
+}
+
+/* Update form */
+.update-user-container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #333;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.update-user-container h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.update-user-container form {
+    background-color: #444;
+    padding: 20px;
+    border-radius: 5px;
+}
+
+.update-user-container form label {
+    display: block;
+    margin-bottom: 5px;
+    color: #fff;
+}
+
+.update-user-container form input[type="text"],
+.update-user-container form input[type="password"],
+.update-user-container form input[type="number"],
+.update-user-container form select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #555;
+    color: #fff;
+}
+
+.update-user-container form button[type="submit"] {
+    background-color: #28a745; /* Green */
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+.update-user-container form button[type="submit"]:hover {
+    background-color: #218838;
+}
+.admin-view-container table a[href^="update.php"] {
+    background-color: #28a745 !important; /* Green */
+}
+
+.admin-view-container table a[href^="delete.php"] {
+    background-color: #dc3545 !important; /* Red */
+    color: #fff; /* Set text color to white */
+}
+
+.admin-view-container table a[href^="delete.php"]:hover {
+    opacity: 0.8;
+}
+/* For small screens */
+@media only screen and (max-width: 600px) {
+    .admin-view-container {
+        max-width: 100%;
+    }
+    
+    table {
+        font-size: 14px;
+    }
+
+    /* Adjust other styles as needed */
+}
+
+/* For medium screens */
+@media only screen and (min-width: 601px) and (max-width: 1024px) {
+    /* Add styles specific to medium-sized screens */
+}
+
+/* For large screens */
+@media only screen and (min-width: 1025px) {
+    /* Add styles specific to large screens */
+}
