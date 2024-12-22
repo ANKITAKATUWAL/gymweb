@@ -22,16 +22,17 @@ $subscription = mysqli_stmt_get_result($stmt)->fetch_assoc();
 $attendance_stats = mysqli_fetch_assoc(mysqli_query($con, 
     "SELECT 
         COUNT(*) as total_visits,
-        COUNT(DISTINCT MONTH(check_in_date)) as months_visited,
-        MAX(check_in_date) as last_visit
+        COUNT(DISTINCT DATE_FORMAT(check_in_time, '%Y-%m')) as months_visited,
+        MAX(check_in_time) as last_visit
     FROM attendance 
     WHERE user_id = $user_id"
 ));
 
 // Get recent attendance
-$attendance_query = "SELECT * FROM attendance 
+$attendance_query = "SELECT *, DATE(check_in_time) as check_in_date 
+                    FROM attendance 
                     WHERE user_id = ? 
-                    ORDER BY check_in_date DESC, check_in_time DESC 
+                    ORDER BY check_in_time DESC 
                     LIMIT 5";
 $stmt = mysqli_prepare($con, $attendance_query);
 mysqli_stmt_bind_param($stmt, "i", $user_id);
@@ -370,15 +371,27 @@ function markAttendance() {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-        }
+            'Accept': 'application/json'
+        },
+        credentials: 'include'
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
-            location.reload();
+            alert(data.message);
+            window.location.reload();
         } else {
             alert(data.message || 'Failed to mark attendance');
         }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to mark attendance. Please try again.');
     });
 }
 </script>

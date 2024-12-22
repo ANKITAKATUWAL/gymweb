@@ -8,13 +8,14 @@ checkAdminRole();
 $stats = [
     'total_users' => mysqli_fetch_assoc(mysqli_query($con, "SELECT COUNT(*) as count FROM users WHERE role = 'user'"))['count'],
     'active_subscriptions' => mysqli_fetch_assoc(mysqli_query($con, "SELECT COUNT(*) as count FROM subscriptions WHERE payment_status = 'Approved'"))['count'],
-    'today_attendance' => mysqli_fetch_assoc(mysqli_query($con, "SELECT COUNT(DISTINCT user_id) as count FROM attendance WHERE check_in_date = CURDATE()"))['count'],
+    'today_attendance' => mysqli_fetch_assoc(mysqli_query($con, "SELECT COUNT(DISTINCT user_id) as count FROM attendance WHERE DATE(check_in_time) = CURDATE()"))['count'],
     'total_revenue' => mysqli_fetch_assoc(mysqli_query($con, "SELECT COALESCE(SUM(amount), 0) as total FROM payments"))['total']
 ];
 
 // Recent activities
 $recent_subscriptions = mysqli_query($con, "
-    SELECT s.*, u.full_name, g.plan_name 
+    SELECT s.*, u.full_name, g.plan_name, 
+           DATE(s.subscription_date) as formatted_date
     FROM subscriptions s
     JOIN users u ON s.user_id = u.user_id
     JOIN gym_plans g ON s.plan_id = g.plan_id
@@ -60,7 +61,7 @@ $recent_subscriptions = mysqli_query($con, "
                 <tr>
                     <td><?php echo htmlspecialchars($sub['full_name']); ?></td>
                     <td><?php echo htmlspecialchars($sub['plan_name']); ?></td>
-                    <td><?php echo date('Y-m-d', strtotime($sub['subscription_date'])); ?></td>
+                    <td><?php echo htmlspecialchars($sub['formatted_date']); ?></td>
                     <td><?php echo htmlspecialchars($sub['payment_status']); ?></td>
                 </tr>
                 <?php endwhile; ?>

@@ -11,4 +11,3 @@ session_destroy();
 // Redirect to login page
 header("Location: " . SITE_URL . "/auth/login.php");
 exit();
-  </rewritten_file> 

@@ -30,7 +30,7 @@ CREATE TABLE subscriptions (
     user_id INT NOT NULL,
     plan_id INT NOT NULL,
     subscription_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    payment_status ENUM('Pending', 'Paid', 'Approved') DEFAULT 'Pending',
+    payment_status ENUM('Pending', 'Paid', 'Approved', 'Rejected') DEFAULT 'Pending',
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (plan_id) REFERENCES gym_plans(plan_id) ON DELETE CASCADE
 );
@@ -39,12 +39,11 @@ CREATE TABLE subscriptions (
 CREATE TABLE attendance (
     attendance_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    check_in_date DATE NOT NULL,
-    check_in_time TIME NOT NULL,
+    check_in_time DATETIME NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
--- Add payment tracking
+-- Table for Payments
 CREATE TABLE payments (
     payment_id INT AUTO_INCREMENT PRIMARY KEY,
     subscription_id INT NOT NULL,
@@ -54,13 +53,30 @@ CREATE TABLE payments (
     FOREIGN KEY (subscription_id) REFERENCES subscriptions(subscription_id)
 );
 
--- Insert Sample Data (Optional)
-INSERT INTO gym_plans (plan_name, plan_description, plan_price, plan_duration) 
-VALUES 
-('Basic Plan', 'Access to gym equipment only', 50.00, 1),
-('Standard Plan', 'Includes equipment and group classes', 100.00, 3),
-('Premium Plan', 'All-inclusive access with personal training', 200.00, 6);
+-- Insert Sample Gym Plans
+INSERT INTO gym_plans (plan_name, plan_description, plan_price, plan_duration) VALUES 
+('Basic Plan', 'Access to basic gym equipment\nCardio area access\nLocker room access\nBasic fitness assessment', 1500.00, 1),
+('Standard Plan', 'All Basic Plan features\nGroup fitness classes\nPersonal trainer (2 sessions/month)\nNutrition consultation', 2500.00, 3),
+('Premium Plan', 'All Standard Plan features\nUnlimited personal training\nSauna access\nProtein shake per visit\nGuest passes (2/month)', 4000.00, 6);
 
--- Insert admin user
-INSERT INTO users (full_name, email, password, role) 
-VALUES ('Admin', 'admin@gmail.com', 'Admin@1234', 'admin');
+-- Insert Demo Users (passwords are hashed version of the actual passwords)
+INSERT INTO users (full_name, email, password, phone_number, role) VALUES
+('Admin User', 'admin@gym.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '9800000000', 'admin'),
+('Premium Member', 'premium@test.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '9811111111', 'user'),
+('Regular Member', 'user@test.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '9822222222', 'user');
+
+-- Add Premium subscription for premium user
+INSERT INTO subscriptions (user_id, plan_id, payment_status) 
+SELECT 
+    (SELECT user_id FROM users WHERE email = 'premium@test.com'),
+    (SELECT plan_id FROM gym_plans WHERE plan_name = 'Premium Plan'),
+    'Approved';
+
+-- Add some attendance records for premium user
+INSERT INTO attendance (user_id, check_in_time) 
+SELECT 
+    (SELECT user_id FROM users WHERE email = 'premium@test.com'),
+    DATE_SUB(NOW(), INTERVAL n DAY)
+FROM (
+    SELECT 0 AS n UNION SELECT 1 UNION SELECT 3 UNION SELECT 5 UNION SELECT 7
+) numbers;
