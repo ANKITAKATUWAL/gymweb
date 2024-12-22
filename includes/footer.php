@@ -1,3 +1,6 @@
+<?php
+ob_end_flush();
+?>
     </div><!-- /.main-content -->
     <footer class="main-footer">
         <div class="footer-container">

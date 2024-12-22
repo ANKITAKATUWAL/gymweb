@@ -4,77 +4,115 @@ require_once '../includes/functions.php';
 require_once '../includes/header.php';
 checkAdminRole();
 
-// Handle subscription approval/rejection
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['subscription_id'], $_POST['action'])) {
-    $subscription_id = intval($_POST['subscription_id']);
-    $action = $_POST['action'];
-    $note = sanitizeInput($_POST['note'] ?? '');
-    
-    try {
-        mysqli_begin_transaction($con);
-        
-        // Verify subscription exists and is in Paid status
-        $check_sql = "SELECT s.*, p.payment_id 
-                     FROM subscriptions s 
-                     LEFT JOIN payments p ON s.subscription_id = p.subscription_id 
-                     WHERE s.subscription_id = ? AND s.payment_status = 'Paid'";
-        $stmt = mysqli_prepare($con, $check_sql);
-        mysqli_stmt_bind_param($stmt, "i", $subscription_id);
-        mysqli_stmt_execute($stmt);
-        $subscription = mysqli_stmt_get_result($stmt)->fetch_assoc();
-        
-        if (!$subscription) {
-            throw new Exception("Invalid subscription or payment status");
-        }
-        
-        // Update subscription status
-        $new_status = ($action === 'approve') ? 'Approved' : 'Rejected';
-        $update_sql = "UPDATE subscriptions 
-                      SET payment_status = ?, 
-                          approval_date = CURRENT_TIMESTAMP,
-                          admin_note = ? 
-                      WHERE subscription_id = ?";
-        
-        $stmt = mysqli_prepare($con, $update_sql);
-        mysqli_stmt_bind_param($stmt, "ssi", $new_status, $note, $subscription_id);
-        
-        if (!mysqli_stmt_execute($stmt)) {
-            throw new Exception("Failed to update subscription status");
-        }
-        
-        mysqli_commit($con);
-        $success_message = "Subscription successfully " . ($action === 'approve' ? 'approved' : 'rejected');
-    } catch (Exception $e) {
-        mysqli_rollback($con);
-        $error_message = $e->getMessage();
-    }
-}
-
-// Get all subscriptions with user and plan details
-$subscriptions_sql = "SELECT s.*, 
-                            u.full_name, u.email, 
-                            g.plan_name, g.plan_price,
-                            p.payment_id, p.khalti_token,
-                            DATE_FORMAT(s.subscription_date, '%M %d, %Y') as formatted_date,
-                            CASE 
-                                WHEN s.approval_date IS NOT NULL 
-                                THEN DATE_FORMAT(s.approval_date, '%M %d, %Y') 
-                                ELSE NULL 
-                            END as formatted_approval_date
-                     FROM subscriptions s
-                     JOIN users u ON s.user_id = u.user_id
-                     JOIN gym_plans g ON s.plan_id = g.plan_id
-                     LEFT JOIN payments p ON s.subscription_id = p.subscription_id
-                     ORDER BY s.subscription_date DESC";
-
-$subscriptions = mysqli_query($con, $subscriptions_sql);
-if (!$subscriptions) {
-    die("Query failed: " . mysqli_error($con));
-}
+// Add this CSS at the top of the file after header inclusion
 ?>
+<style>
+.subscription-table {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.subscription-table th {
+    background: #f8f9fa;
+    padding: 15px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.member-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.member-name {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.member-email {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.date-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.approval-date {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.status-pending { background: #fff3cd; color: #856404; }
+.status-paid { background: #cce5ff; color: #004085; }
+.status-approved { background: #d4edda; color: #155724; }
+.status-rejected { background: #f8d7da; color: #721c24; }
+
+.controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    background: white;
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.search-box {
+    position: relative;
+    width: 300px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 8px 35px 8px 15px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    outline: none;
+}
+
+.search-box i {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.action-buttons button {
+    padding: 6px 12px;
+    border-radius: 15px;
+}
+</style>
 
 <div class="container mt-4">
-    <h1>Manage Subscriptions</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3">Manage Subscriptions</h1>
+        <div class="search-box">
+            <input type="text" id="searchSubscriptions" placeholder="Search subscriptions...">
+            <i class="fas fa-search"></i>
+        </div>
+    </div>
     
     <?php if (isset($success_message)): ?>
         <div class="alert alert-success"><?php echo $success_message; ?></div>
@@ -84,19 +122,12 @@ if (!$subscriptions) {
         <div class="alert alert-danger"><?php echo $error_message; ?></div>
     <?php endif; ?>
     
-    <div class="controls mb-4">
-        <div class="filter-buttons">
-            <button class="btn btn-outline-primary active" data-filter="all">All</button>
-            <button class="btn btn-outline-primary" data-filter="pending">Pending</button>
-            <button class="btn btn-outline-primary" data-filter="paid">Paid</button>
-            <button class="btn btn-outline-primary" data-filter="approved">Approved</button>
-            <button class="btn btn-outline-primary" data-filter="rejected">Rejected</button>
-        </div>
-        
-        <div class="search-box">
-            <input type="text" id="searchSubscriptions" placeholder="Search subscriptions...">
-            <i class="fas fa-search"></i>
-        </div>
+    <div class="filter-buttons mb-3">
+        <button class="btn btn-outline-primary active" data-filter="all">All</button>
+        <button class="btn btn-outline-warning" data-filter="pending">Pending</button>
+        <button class="btn btn-outline-info" data-filter="paid">Paid</button>
+        <button class="btn btn-outline-success" data-filter="approved">Approved</button>
+        <button class="btn btn-outline-danger" data-filter="rejected">Rejected</button>
     </div>
 
     <div class="table-responsive">
@@ -113,7 +144,33 @@ if (!$subscriptions) {
                 </tr>
             </thead>
             <tbody>
-                <?php while ($sub = mysqli_fetch_assoc($subscriptions)): ?>
+                <?php
+                // Get all subscriptions with user and plan details
+                $subscriptions_sql = "SELECT s.*, 
+                                            u.full_name, u.email, 
+                                            g.plan_name, g.plan_price,
+                                            p.payment_id, p.khalti_token,
+                                            DATE_FORMAT(s.subscription_date, '%M %d, %Y') as formatted_date,
+                                            CASE 
+                                                WHEN s.approval_date IS NOT NULL 
+                                                THEN DATE_FORMAT(s.approval_date, '%M %d, %Y') 
+                                                ELSE NULL 
+                                            END as formatted_approval_date
+                                         FROM subscriptions s
+                                         JOIN users u ON s.user_id = u.user_id
+                                         JOIN gym_plans g ON s.plan_id = g.plan_id
+                                         LEFT JOIN payments p ON s.subscription_id = p.subscription_id
+                                         ORDER BY s.subscription_date DESC";
+
+                // Change this line
+                $subscriptions_result = mysqli_query($con, $subscriptions_sql);
+                if (!$subscriptions_result) {
+                    die("Query failed: " . mysqli_error($con));
+                }
+
+                // And update the while loop to use $subscriptions_result instead of $subscriptions
+                while ($sub = mysqli_fetch_assoc($subscriptions_result)):
+                    ?>
                     <tr class="subscription-row" data-status="<?php echo strtolower($sub['payment_status']); ?>">
                         <td>
                             <div class="member-info">
