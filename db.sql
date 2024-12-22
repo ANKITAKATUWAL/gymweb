@@ -31,6 +31,8 @@ CREATE TABLE subscriptions (
     plan_id INT NOT NULL,
     subscription_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     payment_status ENUM('Pending', 'Paid', 'Approved', 'Rejected') DEFAULT 'Pending',
+    approval_date TIMESTAMP NULL,
+    admin_note TEXT NULL,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (plan_id) REFERENCES gym_plans(plan_id) ON DELETE CASCADE
 );
@@ -53,13 +55,13 @@ CREATE TABLE payments (
     FOREIGN KEY (subscription_id) REFERENCES subscriptions(subscription_id)
 );
 
--- Insert Sample Gym Plans
+-- Insert Sample Gym Plans (Prices adjusted for Khalti limits: Rs. 10 - Rs. 1000)
 INSERT INTO gym_plans (plan_name, plan_description, plan_price, plan_duration) VALUES 
-('Basic Plan', 'Access to basic gym equipment\nCardio area access\nLocker room access\nBasic fitness assessment', 1500.00, 1),
-('Standard Plan', 'All Basic Plan features\nGroup fitness classes\nPersonal trainer (2 sessions/month)\nNutrition consultation', 2500.00, 3),
-('Premium Plan', 'All Standard Plan features\nUnlimited personal training\nSauna access\nProtein shake per visit\nGuest passes (2/month)', 4000.00, 6);
+('Basic Plan', 'Access to basic gym equipment\nCardio area access\nLocker room access\nBasic fitness assessment', 100.00, 1),
+('Standard Plan', 'All Basic Plan features\nGroup fitness classes\nPersonal trainer (2 sessions/month)\nNutrition consultation', 500.00, 3),
+('Premium Plan', 'All Standard Plan features\nUnlimited personal training\nSauna access\nProtein shake per visit\nGuest passes (2/month)', 799.00, 6);
 
--- Insert Demo Users (passwords are hashed version of the actual passwords)
+-- Insert Demo Users (passwords are hashed version of 'password')
 INSERT INTO users (full_name, email, password, phone_number, role) VALUES
 ('Admin User', 'admin@gym.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '9800000000', 'admin'),
 ('Premium Member', 'premium@test.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '9811111111', 'user'),
@@ -80,3 +82,6 @@ SELECT
 FROM (
     SELECT 0 AS n UNION SELECT 1 UNION SELECT 3 UNION SELECT 5 UNION SELECT 7
 ) numbers;
+
+-- Remove notifications table if it exists
+DROP TABLE IF EXISTS notifications;

@@ -23,37 +23,77 @@ $subscription = mysqli_stmt_get_result($stmt)->fetch_assoc();
 if (!$subscription) {
     redirectTo(SITE_URL . '/user/membership.php');
 }
+
+// Prepare data for JavaScript
+$paymentData = [
+    'subscription_id' => $subscription_id,
+    'amount' => $subscription['plan_price'] * 100,
+    'customer_info' => [
+        'name' => $_SESSION['full_name'] ?? '',
+        'email' => $_SESSION['email'] ?? '',
+        'phone' => $_SESSION['phone_number'] ?? ''
+    ]
+];
 ?>
 
-<div class="container">
+<div class="container mt-5">
     <div class="payment-section">
         <h1>Complete Payment</h1>
         
-        <div class="payment-details">
+        <div class="payment-details card p-4 mb-4">
             <h3>Plan: <?php echo htmlspecialchars($subscription['plan_name']); ?></h3>
-            <p>Amount: Rs. <?php echo number_format($subscription['plan_price'], 2); ?></p>
+            <p class="mb-0">Amount: Rs. <?php echo number_format($subscription['plan_price'], 2); ?></p>
         </div>
         
-        <button id="payment-button" class="btn btn-primary">Pay with Khalti</button>
+        <button id="payment-button" class="btn btn-primary btn-lg">Pay with Khalti</button>
+        <div id="payment-status"></div>
     </div>
 </div>
 
-<!-- Khalti SDK -->
-<script src="https://khalti.s3.ap-south-1.amazonaws.com/KPG/dist/2020.12.22.0.0.0/khalti-checkout.iffe.js"></script>
-<script>
-    var config = {
-        "publicKey": "<?php echo KHALTI_PUBLIC_KEY; ?>",
-        "productIdentity": "<?php echo $subscription_id; ?>",
-        "productName": "<?php echo $subscription['plan_name']; ?>",
-        "productUrl": "<?php echo SITE_URL; ?>",
-        "amount": <?php echo $subscription['plan_price'] * 100; ?>,
-        "eventHandler": {
-            onSuccess: handlePaymentSuccess,
-            onError: handlePaymentError
-        }
-    };
-</script>
-<script src="<?php echo SITE_URL; ?>/assets/js/khalti.js"></script>
-<script>initializeKhaltiPayment(config);</script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<?php require_once '../includes/footer.php'; ?> 
+<script>
+// Pass PHP data to JavaScript safely
+var paymentData = <?php echo json_encode($paymentData); ?>;
+var siteUrl = <?php echo json_encode(SITE_URL); ?>;
+
+$(document).ready(function() {
+    console.log('Document ready');
+    
+    $('#payment-button').on('click', function(e) {
+        e.preventDefault();
+        console.log('Payment button clicked');
+        
+        var $btn = $(this);
+        var $status = $('#payment-status');
+        
+        $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Processing...');
+        $status.html('Initializing payment...');
+        
+        console.log('Payment data:', paymentData);
+        
+        $.ajax({
+            url: siteUrl + '/process_payment.php',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(paymentData),
+            success: function(response) {
+                console.log('Success response:', response);
+                if (response.payment_url) {
+                    $status.html('Redirecting to payment page...');
+                    window.location.href = response.payment_url;
+                } else {
+                    throw new Error(response.message || 'Payment initialization failed');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', {xhr: xhr, status: status, error: error});
+                $status.html('Payment failed: ' + error);
+                $btn.prop('disabled', false).html('Pay with Khalti');
+            }
+        });
+    });
+});
+</script>
+
+<?php require_once '../includes/footer.php'; ?>

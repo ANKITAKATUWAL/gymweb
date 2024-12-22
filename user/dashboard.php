@@ -1,5 +1,6 @@
 <?php
 $page_title = 'Dashboard';
+$additional_css = ['dashboard.css'];
 require_once '../includes/functions.php';
 require_once '../includes/header.php';
 checkLoggedIn();

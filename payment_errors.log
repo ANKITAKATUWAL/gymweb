@@ -1,0 +1,96 @@
+2024-12-22 03:17:24 - Payment Error: Raw input: {"subscription_id":3,"amount":10000,"customer_info":{"name":"Regular Member","email":"","phone":""}}
+2024-12-22 03:17:24 - Payment Error: Decoded input: Array
+(
+    [subscription_id] => 3
+    [amount] => 10000
+    [customer_info] => Array
+        (
+            [name] => Regular Member
+            [email] => 
+            [phone] => 
+        )
+
+)
+
+2024-12-22 03:17:24 - Payment Error: Khalti request data: Array
+(
+    [return_url] => http://localhost/gymweb/payment_verify.php
+    [website_url] => http://localhost/gymweb
+    [amount] => 10000
+    [purchase_order_id] => 3
+    [purchase_order_name] => Gym Subscription #3
+    [customer_info] => Array
+        (
+            [name] => Regular Member
+            [email] => 
+            [phone] => 
+        )
+
+)
+
+2024-12-22 03:17:26 - Payment Error: Khalti response: {"detail":"Invalid token.","status_code":401}
+2024-12-22 03:17:26 - Payment Error: Exception: Payment initialization failed
+2024-12-22 03:17:28 - Payment Error: Raw input: {"subscription_id":3,"amount":10000,"customer_info":{"name":"Regular Member","email":"","phone":""}}
+2024-12-22 03:17:28 - Payment Error: Decoded input: Array
+(
+    [subscription_id] => 3
+    [amount] => 10000
+    [customer_info] => Array
+        (
+            [name] => Regular Member
+            [email] => 
+            [phone] => 
+        )
+
+)
+
+2024-12-22 03:17:28 - Payment Error: Khalti request data: Array
+(
+    [return_url] => http://localhost/gymweb/payment_verify.php
+    [website_url] => http://localhost/gymweb
+    [amount] => 10000
+    [purchase_order_id] => 3
+    [purchase_order_name] => Gym Subscription #3
+    [customer_info] => Array
+        (
+            [name] => Regular Member
+            [email] => 
+            [phone] => 
+        )
+
+)
+
+2024-12-22 03:17:29 - Payment Error: Khalti response: {"detail":"Invalid token.","status_code":401}
+2024-12-22 03:17:29 - Payment Error: Exception: Payment initialization failed
+2024-12-22 03:17:56 - Payment Error: Raw input: {"subscription_id":4,"amount":50000,"customer_info":{"name":"Regular Member","email":"","phone":""}}
+2024-12-22 03:17:56 - Payment Error: Decoded input: Array
+(
+    [subscription_id] => 4
+    [amount] => 50000
+    [customer_info] => Array
+        (
+            [name] => Regular Member
+            [email] => 
+            [phone] => 
+        )
+
+)
+
+2024-12-22 03:17:56 - Payment Error: Khalti request data: Array
+(
+    [return_url] => http://localhost/gymweb/payment_verify.php
+    [website_url] => http://localhost/gymweb
+    [amount] => 50000
+    [purchase_order_id] => 4
+    [purchase_order_name] => Gym Subscription #4
+    [customer_info] => Array
+        (
+            [name] => Regular Member
+            [email] => 
+            [phone] => 
+        )
+
+)
+
+2024-12-22 03:17:58 - Payment Error: Khalti response: {"detail":"Invalid token.","status_code":401}
+2024-12-22 03:17:58 - Payment Error: Exception: Payment initialization failed
