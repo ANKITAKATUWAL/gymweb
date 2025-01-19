@@ -37,4 +37,3 @@ function showAlert($message, $type = 'success') {
 function generatePasswordHash($password) {
     return password_hash($password, PASSWORD_DEFAULT);
 }
-?> 

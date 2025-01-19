@@ -92,5 +92,4 @@ if (!isset($_SESSION['user_id']) && !in_array(basename($_SERVER['PHP_SELF']), ['
     </header>
     <div class="main-content">
 </body>
-</html>
-?> 
+</html> 

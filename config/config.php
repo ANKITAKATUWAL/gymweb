@@ -17,4 +17,3 @@ define('KHALTI_API_URL', 'https://a.khalti.com/api/v2/epayment/');
 // Error reporting
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-?> 
