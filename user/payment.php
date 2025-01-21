@@ -59,36 +59,35 @@ $paymentData = [
 <script src="https://khalti.s3.ap-south-1.amazonaws.com/KPG/dist/2020.12.22.0.0.0/khalti-checkout.iffe.js"></script>
 
 <script>
-// Pass PHP data to JavaScript safely
-var paymentData = <?php echo json_encode($paymentData); ?>;
-var siteUrl = <?php echo json_encode(SITE_URL); ?>;
-
-var config = {
-    "publicKey": "<?php echo KHALTI_PUBLIC_KEY; ?>",
-    "productIdentity": "<?php echo $subscription_id; ?>",
-    "productName": "Gym Subscription #<?php echo $subscription_id; ?>",
-    "productUrl": "<?php echo SITE_URL; ?>",
-    "amount": <?php echo $subscription['plan_price'] * 100; ?>,
-    "eventHandler": {
-        onSuccess(payload) {
-            console.log(payload);
-            window.location.href = "<?php echo SITE_URL; ?>/payment_verify.php?pidx=" + payload.pidx;
-        },
-        onError(error) {
-            console.log(error);
-            $('#payment-status').html('<div class="alert alert-danger">Payment failed. Please try again.</div>');
-        },
-        onClose() {
-            console.log('widget is closing');
-        }
+var paymentData = {
+    subscription_id: <?php echo $subscription_id; ?>,
+    amount: <?php echo $subscription['plan_price'] * 100; ?>,
+    customer_info: {
+        name: "<?php echo addslashes($subscription['full_name']); ?>",
+        email: "<?php echo addslashes($subscription['email']); ?>",
+        phone: "<?php echo addslashes($subscription['phone_number']); ?>"
     }
 };
 
-var checkout = new KhaltiCheckout(config);
-var btn = document.getElementById("payment-button");
-btn.onclick = function () {
-    checkout.show({amount: <?php echo $subscription['plan_price'] * 100; ?>});
-}
+$('#payment-button').click(function() {
+    $.ajax({
+        url: '<?php echo SITE_URL; ?>/process_payment.php',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(paymentData),
+        success: function(response) {
+            if (response.success && response.payment_url) {
+                window.location.href = response.payment_url;
+            } else {
+                $('#payment-status').html('<div class="alert alert-danger">Payment initialization failed</div>');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error(xhr.responseText);
+            $('#payment-status').html('<div class="alert alert-danger">Payment initialization failed</div>');
+        }
+    });
+});
 </script>
 
 <?php

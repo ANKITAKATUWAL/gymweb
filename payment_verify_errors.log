@@ -1,0 +1,57 @@
+2025-01-21 04:39:48 - Verification Error: Missing required parameters
+2025-01-21 04:41:38 - Verification Error: Received parameters: Array
+(
+    [pidx] => K32Tt2jEVC8EQpUMdfx4i8
+    [transaction_id] => BUL8j62zm977W9LYvauiyk
+    [tidx] => BUL8j62zm977W9LYvauiyk
+    [amount] => 79900
+    [total_amount] => 79900
+    [mobile] => 98XXXXX000
+    [status] => Completed
+    [purchase_order_id] => 5
+    [purchase_order_name] => Subscription
+)
+
+2025-01-21 04:41:39 - Verification Error: Khalti Lookup Response: {"pidx":"K32Tt2jEVC8EQpUMdfx4i8","total_amount":79900,"status":"Completed","transaction_id":"BUL8j62zm977W9LYvauiyk","fee":0,"refunded":false}
+2025-01-21 04:59:13 - Verification Error: Received parameters: Array
+(
+    [pidx] => K32Tt2jEVC8EQpUMdfx4i8
+    [transaction_id] => BUL8j62zm977W9LYvauiyk
+    [tidx] => BUL8j62zm977W9LYvauiyk
+    [amount] => 79900
+    [total_amount] => 79900
+    [mobile] => 98XXXXX000
+    [status] => Completed
+    [purchase_order_id] => 5
+    [purchase_order_name] => Subscription
+)
+
+2025-01-21 04:59:14 - Verification Error: Khalti Lookup Response: {"pidx":"K32Tt2jEVC8EQpUMdfx4i8","total_amount":79900,"status":"Completed","transaction_id":"BUL8j62zm977W9LYvauiyk","fee":0,"refunded":false}
+2025-01-21 05:00:07 - Verification Error: Received parameters: Array
+(
+    [pidx] => bTdsffLiL48dsKwXMB6B5j
+    [transaction_id] => JCXfKJwjw6Y3ZshxhDCp3E
+    [tidx] => JCXfKJwjw6Y3ZshxhDCp3E
+    [amount] => 79900
+    [total_amount] => 79900
+    [mobile] => 98XXXXX000
+    [status] => Completed
+    [purchase_order_id] => 2
+    [purchase_order_name] => test
+)
+
+2025-01-21 05:00:09 - Verification Error: Khalti Lookup Response: {"pidx":"bTdsffLiL48dsKwXMB6B5j","total_amount":79900,"status":"Completed","transaction_id":"JCXfKJwjw6Y3ZshxhDCp3E","fee":0,"refunded":false}
+2025-01-21 05:03:29 - Verification Error: Received parameters: Array
+(
+    [pidx] => A49KUMbMtNJzubQGyo2QRT
+    [transaction_id] => DqthVo5bTWxGNjJ5ikixNk
+    [tidx] => DqthVo5bTWxGNjJ5ikixNk
+    [amount] => 50000
+    [total_amount] => 50000
+    [mobile] => 98XXXXX000
+    [status] => Completed
+    [purchase_order_id] => 3
+    [purchase_order_name] => test
+)
+
+2025-01-21 05:03:30 - Verification Error: Khalti Lookup Response: {"pidx":"A49KUMbMtNJzubQGyo2QRT","total_amount":50000,"status":"Completed","transaction_id":"DqthVo5bTWxGNjJ5ikixNk","fee":0,"refunded":false}

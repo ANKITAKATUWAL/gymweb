@@ -1,11 +1,11 @@
 -- SQL Script for Gym Management System
 
 -- Create the database
-CREATE DATABASE gym_management;
+CREATE DATABASE IF NOT EXISTS gym_management;
 USE gym_management;
 
 -- Table for Users
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
     full_name VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
@@ -16,7 +16,7 @@ CREATE TABLE users (
 );
 
 -- Table for Gym Plans
-CREATE TABLE gym_plans (
+CREATE TABLE IF NOT EXISTS gym_plans (
     plan_id INT AUTO_INCREMENT PRIMARY KEY,
     plan_name VARCHAR(100) NOT NULL,
     plan_description TEXT,
@@ -25,12 +25,14 @@ CREATE TABLE gym_plans (
 );
 
 -- Table for Subscriptions
-CREATE TABLE subscriptions (
+CREATE TABLE IF NOT EXISTS subscriptions (
     subscription_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     plan_id INT NOT NULL,
     subscription_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     payment_status ENUM('Pending', 'Paid', 'Approved', 'Rejected') DEFAULT 'Pending',
+    payment_token VARCHAR(255) NULL, -- Added payment_token column
+    payment_date DATETIME NULL, -- Added payment_date column
     approval_date TIMESTAMP NULL,
     admin_note TEXT NULL,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
@@ -38,7 +40,7 @@ CREATE TABLE subscriptions (
 );
 
 -- Table for Attendance Records
-CREATE TABLE attendance (
+CREATE TABLE IF NOT EXISTS attendance (
     attendance_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     check_in_time DATETIME NOT NULL,
@@ -46,7 +48,7 @@ CREATE TABLE attendance (
 );
 
 -- Table for Payments
-CREATE TABLE payments (
+CREATE TABLE IF NOT EXISTS payments (
     payment_id INT AUTO_INCREMENT PRIMARY KEY,
     subscription_id INT NOT NULL,
     amount DECIMAL(10, 2) NOT NULL,
@@ -85,3 +87,9 @@ FROM (
 
 -- Remove notifications table if it exists
 DROP TABLE IF EXISTS notifications;
+
+
+
+ALTER TABLE subscriptions 
+ADD COLUMN approved_by INT NULL,
+ADD FOREIGN KEY (approved_by) REFERENCES users(user_id);

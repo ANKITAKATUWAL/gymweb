@@ -11,8 +11,8 @@ define('SITE_NAME', 'Gym Management System');
 
 // Khalti configuration
 define('KHALTI_PUBLIC_KEY', 'test_public_key_dc74e0fd57cb46cd93832aee0a390234');
-define('KHALTI_SECRET_KEY', 'test_secret_key_0c2de695f73b4252b5dacf72a73c3692');
-define('KHALTI_API_URL', 'https://a.khalti.com/api/v2/epayment/');
+define('KHALTI_SECRET_KEY', 'live_secret_key_68791341fdd94846a146f0457ff7b455');
+define('KHALTI_API_URL', 'https://dev.khalti.com/api/v2/');
 
 // Error reporting
 error_reporting(E_ALL);

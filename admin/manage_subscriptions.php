@@ -4,6 +4,33 @@ require_once '../includes/functions.php';
 require_once '../includes/header.php';
 checkAdminRole();
 
+// Handle POST request for approval/rejection
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['subscription_id']) && isset($_POST['action'])) {
+        $subscription_id = intval($_POST['subscription_id']);
+        $action = $_POST['action'];
+        $note = isset($_POST['note']) ? trim($_POST['note']) : '';
+        
+        // Update subscription status
+        $new_status = ($action === 'approve') ? 'Approved' : 'Rejected';
+        
+        $update_sql = "UPDATE subscriptions SET 
+                      payment_status = ?,
+                      approval_date = NOW(),
+                      admin_note = ?
+                      WHERE subscription_id = ?";
+                      
+        $stmt = mysqli_prepare($con, $update_sql);
+        mysqli_stmt_bind_param($stmt, "ssi", $new_status, $note, $subscription_id);
+        
+        if (mysqli_stmt_execute($stmt)) {
+            $success_message = "Subscription has been " . strtolower($new_status);
+        } else {
+            $error_message = "Failed to update subscription status";
+        }
+    }
+}
+
 // Add this CSS at the top of the file after header inclusion
 ?>
 <style>
@@ -216,43 +243,72 @@ checkAdminRole();
 </div>
 
 <!-- Approval Modal -->
-<div class="modal fade" id="approvalModal" tabindex="-1">
+<div class="modal fade" id="approvalModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Confirm Action</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="POST">
-                <div class="modal-body">
-                    <input type="hidden" name="subscription_id" id="modalSubscriptionId">
-                    <input type="hidden" name="action" id="modalAction">
-                    <p id="modalMessage"></p>
-                    <div class="form-group">
-                        <label for="note">Note (optional):</label>
-                        <textarea class="form-control" name="note" id="note" rows="3"></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="confirmButton">Confirm</button>
-                </div>
-            </form>
+            <div class="modal-body">
+                <p id="modalMessage">Are you sure you want to process this subscription?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmApproval">Confirm</button>
+            </div>
         </div>
     </div>
 </div>
 
+<!-- Add Bootstrap JS and jQuery -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script>
+let selectedSubscriptionId = null;
+let selectedAction = null;
+
 function showApprovalModal(subscriptionId, action) {
-    const modal = new bootstrap.Modal(document.getElementById('approvalModal'));
-    document.getElementById('modalSubscriptionId').value = subscriptionId;
-    document.getElementById('modalAction').value = action;
-    document.getElementById('modalMessage').textContent = 
-        `Are you sure you want to ${action} this subscription?`;
-    document.getElementById('confirmButton').className = 
-        `btn btn-${action === 'approve' ? 'success' : 'danger'}`;
-    modal.show();
+    selectedSubscriptionId = subscriptionId;
+    selectedAction = action;
+    
+    const message = action === 'approve' 
+        ? 'Are you sure you want to approve this subscription?' 
+        : 'Are you sure you want to reject this subscription?';
+    
+    $('#modalMessage').text(message);
+    $('#confirmApproval').removeClass('btn-success btn-danger')
+        .addClass(action === 'approve' ? 'btn-success' : 'btn-danger')
+        .text(action === 'approve' ? 'Approve' : 'Reject');
+    
+    $('#approvalModal').modal('show');
 }
+
+$('#confirmApproval').click(function() {
+    if (!selectedSubscriptionId || !selectedAction) return;
+    
+    $.ajax({
+        url: '<?php echo SITE_URL; ?>/admin/process_subscription.php',
+        type: 'POST',
+        data: {
+            subscription_id: selectedSubscriptionId,
+            action: selectedAction
+        },
+        success: function(response) {
+            if (response.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + response.message);
+            }
+        },
+        error: function() {
+            alert('An error occurred while processing the request');
+        }
+    });
+    
+    $('#approvalModal').modal('hide');
+});
 
 // Filter functionality
 document.querySelectorAll('.filter-buttons button').forEach(button => {
