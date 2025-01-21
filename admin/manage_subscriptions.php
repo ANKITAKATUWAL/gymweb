@@ -176,7 +176,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $subscriptions_sql = "SELECT s.*, 
                                             u.full_name, u.email, 
                                             g.plan_name, g.plan_price,
-                                            p.payment_id, p.khalti_token,
+                                            s.payment_token as khalti_token,
                                             DATE_FORMAT(s.subscription_date, '%M %d, %Y') as formatted_date,
                                             CASE 
                                                 WHEN s.approval_date IS NOT NULL 
@@ -186,7 +186,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                          FROM subscriptions s
                                          JOIN users u ON s.user_id = u.user_id
                                          JOIN gym_plans g ON s.plan_id = g.plan_id
-                                         LEFT JOIN payments p ON s.subscription_id = p.subscription_id
                                          ORDER BY s.subscription_date DESC";
 
                 // Change this line
@@ -261,9 +260,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 </div>
 
-<!-- Add Bootstrap JS and jQuery -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Add required scripts -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
 let selectedSubscriptionId = null;
@@ -278,7 +278,8 @@ function showApprovalModal(subscriptionId, action) {
         : 'Are you sure you want to reject this subscription?';
     
     $('#modalMessage').text(message);
-    $('#confirmApproval').removeClass('btn-success btn-danger')
+    $('#confirmApproval')
+        .removeClass('btn-success btn-danger btn-primary')
         .addClass(action === 'approve' ? 'btn-success' : 'btn-danger')
         .text(action === 'approve' ? 'Approve' : 'Reject');
     
@@ -286,28 +287,40 @@ function showApprovalModal(subscriptionId, action) {
 }
 
 $('#confirmApproval').click(function() {
-    if (!selectedSubscriptionId || !selectedAction) return;
+    if (!selectedSubscriptionId || !selectedAction) {
+        console.error('Missing subscription ID or action');
+        return;
+    }
     
     $.ajax({
-        url: '<?php echo SITE_URL; ?>/admin/process_subscription.php',
+        url: 'process_subscription.php',
         type: 'POST',
         data: {
             subscription_id: selectedSubscriptionId,
             action: selectedAction
         },
+        dataType: 'json',
+        beforeSend: function() {
+            $('#confirmApproval').prop('disabled', true).text('Processing...');
+        },
         success: function(response) {
+            $('#approvalModal').modal('hide');
             if (response.success) {
-                location.reload();
+                alert(response.message);
+                window.location.reload();
             } else {
-                alert('Error: ' + response.message);
+                alert('Error: ' + (response.message || 'Unknown error occurred'));
             }
         },
-        error: function() {
-            alert('An error occurred while processing the request');
+        error: function(xhr, status, error) {
+            console.error('AJAX Error:', {xhr, status, error});
+            $('#approvalModal').modal('hide');
+            alert('Error processing request. Please check console for details.');
+        },
+        complete: function() {
+            $('#confirmApproval').prop('disabled', false).text(selectedAction === 'approve' ? 'Approve' : 'Reject');
         }
     });
-    
-    $('#approvalModal').modal('hide');
 });
 
 // Filter functionality
